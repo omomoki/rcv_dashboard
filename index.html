@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>保護状況ダッシュボード</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="dashboard-shell">
+      <section class="hero-band" aria-labelledby="dashboardTitle">
+        <div>
+          <p class="eyebrow">Autonomous Recovery Service</p>
+          <h1 id="dashboardTitle">保護されたデータベースのサマリ</h1>
+          <div class="snapshot-meta">
+            <span>リージョン: <strong id="regionLabel"></strong></span>
+            <span>取得時刻: <strong id="snapshotLabel"></strong></span>
+            <span>対象期間: <strong id="windowLabel"></strong></span>
+          </div>
+        </div>
+        <div class="toolbar" aria-label="ダッシュボード操作">
+          <label>
+            <span>コンパートメント</span>
+            <select id="compartmentSelect"></select>
+          </label>
+          <div class="segmented-control" role="group" aria-label="対象期間">
+            <button type="button" data-window="7">7日</button>
+            <button type="button" data-window="30" class="is-active">
+              30日
+            </button>
+            <button type="button" data-window="90">90日</button>
+          </div>
+          <button class="ghost-button" type="button" id="loadButton">
+            JSON読込
+          </button>
+          <button class="ghost-button" type="button" id="resetButton">
+            リセット
+          </button>
+          <input id="jsonInput" type="file" accept="application/json,.json" />
+        </div>
+      </section>
+
+      <section
+        class="metric-grid"
+        id="metricGrid"
+        aria-label="サマリーメトリクス"
+      ></section>
+
+      <section class="panel-grid panel-grid-two">
+        <article class="panel service-panel">
+          <div class="panel-heading">
+            <h2>サービス別サマリ</h2>
+            <p>サービスごとの保護DB数、リアルタイムREDO、容量を確認できます</p>
+          </div>
+          <div class="service-summary-list" id="serviceSummary"></div>
+        </article>
+
+        <article class="panel service-panel">
+          <div class="panel-heading">
+            <h2>サービス別 保護DBリスト</h2>
+            <p>各サービス配下の保護DBをヘルスとREDOの状態で確認できます</p>
+          </div>
+          <div class="service-db-groups" id="serviceDatabaseGroups"></div>
+        </article>
+      </section>
+
+      <section class="panel-grid panel-grid-three">
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <h2>ライフサイクル分布</h2>
+            <p>保護されたデータベースの現在の状態</p>
+          </div>
+          <div class="donut-layout">
+            <div
+              class="donut-chart"
+              id="lifecycleDonut"
+              role="img"
+              aria-label="ライフサイクル分布チャート"
+            ></div>
+            <div class="legend-list" id="lifecycleLegend"></div>
+          </div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <h2>バックアップ間隔ウォッチ</h2>
+            <p>値が大きいほど、未保護データの時間が長くなります</p>
+          </div>
+          <div
+            class="bar-chart"
+            id="gapChart"
+            role="img"
+            aria-label="バックアップ間隔チャート"
+          ></div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <h2>バックアップ実行時間</h2>
+            <p>バックアップ完了までの代表的な所要時間</p>
+          </div>
+          <div
+            class="bar-chart teal"
+            id="runtimeChart"
+            role="img"
+            aria-label="バックアップ実行時間チャート"
+          ></div>
+        </article>
+      </section>
+
+      <section class="panel-grid panel-grid-two">
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <h2>コンパートメント別使用量</h2>
+            <p>コンパートメント別のバックアップ容量と月額コスト見込み</p>
+          </div>
+          <div class="compound-chart" id="compartmentUsage"></div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <h2>保護データ量が多いDB</h2>
+            <p>バックアップ容量が大きい順に、サービス種別とREDO状態を表示</p>
+          </div>
+          <div class="capacity-list" id="capacityList"></div>
+        </article>
+      </section>
+
+      <section class="panel database-table-panel">
+        <div class="panel-heading table-heading">
+          <div>
+            <h2>データベース一覧</h2>
+            <p>サービス別にグループ化し、各サービス内は要確認のものから表示</p>
+          </div>
+          <span class="status-pill" id="reviewCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>データベース</th>
+                <th>サービス</th>
+                <th>コンパートメント</th>
+                <th>状態</th>
+                <th>ヘルス</th>
+                <th>RPO</th>
+                <th>RTO</th>
+                <th>バックアップ容量</th>
+                <th>30日バックアップ</th>
+                <th>Redo</th>
+              </tr>
+            </thead>
+            <tbody id="databaseRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
